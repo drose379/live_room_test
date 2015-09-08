@@ -19,6 +19,21 @@
     			return false;
     		});
 
+    		$("#room1").click(function(event) {
+    			event.preventDefault();
+    			io.emit('roomSelect','room1');
+    		});
+
+    		$("#room2").click(function(event) {
+    			event.preventDefault();
+    			io.emit('roomSelect','room2');
+    		});
+
+    		$("#room3").click(function(event) {
+    			event.preventDefault();
+    			io.emit('roomSelect','room3');
+    		});
+
     		io.on('userEnter',function(name) {
     			$("#activityList").append($("<li>").text(name + " has connected!"));
     		});
@@ -46,9 +61,17 @@
 
 <body>
 	
+
+	<ul>
+		<li id="room1"><a href="">Room1</a></li>
+		<li id="room2"><a href="">Room2</a></li>
+		<li id="room3"><a href="">Room3</a></li>
+	</ul>
+
 	<h4 id="instructions">Enter Name: </h4>
+
 	<form>
-		<input id="name"><button>Send</button>
+		<input id="name"><button>Enter</button>
 	</form>
 
 	<h3>Active Users</h3> 

@@ -15,7 +15,7 @@ var io = require('socket.io')(http);
 */
 
 
-var activeUsers = {};
+var rooms = {};
 
 app.get("/",function(request,response) {
 	response.sendFile(__dirname + '/index.html');
@@ -24,19 +24,32 @@ app.get("/",function(request,response) {
 io.on('connection',function(socket) {
 	
 	var userName;
+	var socketRoom;
+
+	socket.on('roomSelect',function(room) {
+		socket.join(room);
+		socketRoom = room;
+
+		if(room in rooms == false) {
+			rooms[room] = [];
+			console.log("Added new room");
+		}
+
+		//check if rooms object already has field for this room, if yes, leave it alone, if no, create a new field for users of this room, add users in 'nameEntered' event
+
+	});
 
 	socket.on('nameEntered',function(name) {
 		activeUsers[name] = name;
 		userName = name;
-		io.emit('userEnter',name);
-		io.emit('updateActiveUsers',JSON.stringify(activeUsers));
-		console.log(JSON.stringify(activeUsers));
+		socket.broadcast.to(socketRoom).emit('userEnter',name);
+		//io.sockets.in(socketRoom).emit('updateActiveUsers',JSON.stringify(activeUsers));
 	});
 
 	socket.on('disconnect',function() {
-		io.emit('userLeft',userName);
-		delete activeUsers[userName];
-		io.emit('updateActiveUsers',JSON.stringify(activeUsers));
+		socket.broadcast.to(socketRoom).emit('userLeft',userName);
+		//delete activeUsers[userName];
+		//io.sockets.in(socketRoom).emit('updateActiveUsers',JSON.stringify(activeUsers));
 	});
 
 	/**
