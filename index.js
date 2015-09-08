@@ -31,8 +31,7 @@ io.on('connection',function(socket) {
 		socketRoom = room;
 
 		if(room in rooms == false) {
-			rooms[room] = [];
-			console.log("Added new room");
+			rooms[room] = {};
 		}
 
 		//check if rooms object already has field for this room, if yes, leave it alone, if no, create a new field for users of this room, add users in 'nameEntered' event
@@ -40,16 +39,23 @@ io.on('connection',function(socket) {
 	});
 
 	socket.on('nameEntered',function(name) {
-		activeUsers[name] = name;
+		rooms[socketRoom][name] = name;
 		userName = name;
 		socket.broadcast.to(socketRoom).emit('userEnter',name);
-		//io.sockets.in(socketRoom).emit('updateActiveUsers',JSON.stringify(activeUsers));
+		io.sockets.in(socketRoom).emit('updateActiveUsers',JSON.stringify(rooms[socketRoom]));
+
+		//add user to their respective room object in the rooms object
+			//only emit the part of rooms that the user is a part of
+
 	});
 
 	socket.on('disconnect',function() {
 		socket.broadcast.to(socketRoom).emit('userLeft',userName);
-		//delete activeUsers[userName];
-		//io.sockets.in(socketRoom).emit('updateActiveUsers',JSON.stringify(activeUsers));
+		
+		var inner = rooms[socketRoom];
+		delete inner[userName];
+
+		io.sockets.in(socketRoom).emit('updateActiveUsers',JSON.stringify(rooms[socketRoom]));
 	});
 
 	/**
