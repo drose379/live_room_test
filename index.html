@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+
+	<script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+
+    <script>
+    	var io = io();
+
+    	$(function() {
+
+    		$('form').submit(function(event) {
+    			event.preventDefault();
+    			io.emit('nameEntered',$("#name").val());
+    			$('form').hide();
+    			$('#instructions').hide();
+    			return false;
+    		});
+
+    		io.on('userEnter',function(name) {
+    			$("#activityList").append($("<li>").text(name + " has connected!"));
+    		});
+
+    		io.on("userLeft",function(name) {
+    			$("#activityList").append($("<li>").text(name + " has left!"));
+    		})
+
+    		io.on('updateActiveUsers',function(users) {
+    			$("#userList").empty();
+    			var activeUsers = JSON.parse(users);
+    			$.each(activeUsers,function(key,value){
+    				$("#userList").append($("<li>").text(value));
+    			});
+    		});
+
+    		//listen for user selection of room, emit event with the name of the room to join. 
+    		//Do not display active users until the user selects a room, only display the active users in the current room
+
+    	});
+
+    </script>
+
+</head>
+
+<body>
+	
+	<h4 id="instructions">Enter Name: </h4>
+	<form>
+		<input id="name"><button>Send</button>
+	</form>
+
+	<h3>Active Users</h3> 
+	<ul id="userList"></ul>
+	<h3>Activity</h3>
+	<ul id="activityList"></ul>
+
+</body>
+
+</html>
